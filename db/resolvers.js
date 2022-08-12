@@ -17,6 +17,24 @@ const resolvers = {
       const usuarioId = await jwt.verify(token, process.env.SECRETA);
       return usuarioId;
     },
+    obtenerProductos: async () => {
+      try {
+        const productos = await Producto.find({});
+        return productos;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    obtenerProducto: async (_, { id }) => {
+      //revisamos si existe elproducto
+      const producto = await Producto.findById(id);
+
+      if (!producto) {
+        throw new Error("Producto no encontrado");
+      }
+
+      return producto;
+    },
   },
   Mutation: {
     nuevoUsuario: async (_, { input }) => {
@@ -72,8 +90,36 @@ const resolvers = {
 
         return resultado;
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
+    },
+    actualizarProducto: async (_, { id, input }) => {
+      //revisamos si existe elproducto
+      let producto = await Producto.findById(id);
+
+      if (!producto) {
+        throw new Error("Producto no encontrado");
+      }
+
+      //Guardar en la base de datos
+      producto = await Producto.findOneAndUpdate({ _id: id }, input, {
+        new: true,
+      });
+
+      return producto;
+    },
+    eliminarProducto: async (_, { id }) => {
+      //revisamos si existe elproducto
+      let producto = await Producto.findById(id);
+
+      if (!producto) {
+        throw new Error("Producto no encontrado");
+      }
+
+      //Eliminar producto
+      await Producto.findByIdAndDelete({ _id: id });
+
+      return "Producto Eliminado";
     },
   },
 };
